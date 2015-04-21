@@ -6,43 +6,52 @@ from django.utils import timezone
 class RegistrationModel(models.Model):
     user = models.OneToOneField(User)
     activation_key = models.CharField(max_length=40)
-    created = models.DateTimeField(default=timezone.now)
-
+    created_timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
+    last_updated = models.DateTimeField(auto_now_add=False, auto_now=True)
+    
 
 class PasswordResetModel(models.Model):
     user = models.OneToOneField(User)
     reset_key = models.CharField(max_length=40)
-    created = models.DateTimeField(default=timezone.now)
-
+    created_timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
+    last_updated = models.DateTimeField(auto_now_add=False, auto_now=True)
+    
 
 class Region(models.Model):
     name = models.CharField(max_length=64)
     code = models.CharField(max_length=16)
-
+    created_timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
+    last_updated = models.DateTimeField(auto_now_add=False, auto_now=True)
+    
 
 class Country(models.Model):
     name = models.CharField(max_length=64)
     code = models.CharField(max_length=8)
     region = models.ForeignKey(Region)
-
+    created_timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
+    last_updated = models.DateTimeField(auto_now_add=False, auto_now=True)
+    
 
 class City(models.Model):
     name = models.CharField(max_length=64)
     country = models.ForeignKey(Country)
-
+    last_updated = models.DateTimeField(auto_now_add=False, auto_now=True)
+    
 
 class Address(models.Model):
     street = models.CharField(max_length=128)
     country = models.ForeignKey(Country)
     city = models.ForeignKey(City)
-
+    last_updated = models.DateTimeField(auto_now_add=False, auto_now=True)
+     
 
 class Role(models.Model):
     name = models.CharField(max_length=32)
     is_active = models.BooleanField(default=True)
-    created_on = models.DateTimeField(default=timezone.now())
     deleted = models.BooleanField(default=False)
-
+    created_timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
+    last_updated = models.DateTimeField(auto_now_add=False, auto_now=True)
+    
 
 
 class UserProfile(models.Model):
@@ -56,24 +65,31 @@ class UserProfile(models.Model):
     friends = models.ManyToManyField('self', through='Friendship',
                                       symmetrical=False)
     roles = models.ManyToManyField(Role, through='UserRole')
-    created_on = models.DateTimeField(default=timezone.now())
     deleted = models.BooleanField(default=False)
+    created_timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
+    last_updated = models.DateTimeField(auto_now_add=False, auto_now=True)
+    
 
 class UserCountry(models.Model):
     country = models.ForeignKey(Country)
     user = models.ForeignKey(UserProfile)
+    last_updated = models.DateTimeField(auto_now_add=False, auto_now=True)
 
 class Skill(models.Model):
     name = models.CharField(max_length=128)
     description = models.CharField(max_length=512)
     verified = models.BooleanField(default=False)
     parent = models.ForeignKey('self', null=True)
-    created_on = models.DateTimeField(default=timezone.now())
     deleted = models.BooleanField(default=False)
-
+    created_timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
+    last_updated = models.DateTimeField(auto_now_add=False, auto_now=True)
+ 
 
 class Worker(UserProfile):
     skills = models.ManyToManyField(Skill, through='WorkerSkill')
+    created_timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
+    last_updated = models.DateTimeField(auto_now_add=False, auto_now=True)
+ 
     #to be extended, otherwise unnecessary
 
 
@@ -82,7 +98,9 @@ class WorkerSkill(models.Model):
     skill = models.ForeignKey(Skill)
     level = models.IntegerField(null=True)
     verified = models.BooleanField(default=False)
-
+    created_timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
+    last_updated = models.DateTimeField(auto_now_add=False, auto_now=True)
+ 
 class Requester(UserProfile):
 
     pass
@@ -91,36 +109,43 @@ class Requester(UserProfile):
 class UserRole(models.Model):
     user_profile = models.ForeignKey(UserProfile)
     role = models.ForeignKey(Role)
-
+    created_timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
+    last_updated = models.DateTimeField(auto_now_add=False, auto_now=True)
+ 
 
 class Friendship(models.Model):
     user_source = models.ForeignKey(UserProfile, related_name='user_source')
     user_target = models.ForeignKey(UserProfile, related_name='user_target')
-    created_on = models.DateTimeField(default=timezone.now())
     deleted = models.BooleanField(default=False)
-
+    created_timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
+    last_updated = models.DateTimeField(auto_now_add=False, auto_now=True)
+ 
 class Category(models.Model):
     name = models.CharField(max_length=128)
     parent = models.ForeignKey('self')
-    created_on = models.DateTimeField(default=timezone.now())
     deleted = models.BooleanField(default=False)
-
+    created_timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
+    last_updated = models.DateTimeField(auto_now_add=False, auto_now=True)
+  
 
 class Project(models.Model):
     name = models.CharField(max_length=128)
     collaborators = models.ManyToManyField(Requester, through='ProjectRequester')
     deadline = models.DateTimeField(default=timezone.now())
     keywords = models.TextField()
-    created_on = models.DateTimeField(default=timezone.now())
     deleted = models.BooleanField(default=True)
     categories = models.ManyToManyField(Category, through='ProjectCategory')
-
+    created_timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
+    last_updated = models.DateTimeField(auto_now_add=False, auto_now=True)
+ 
 
 #Tracks the list of requesters that collaborate on a specific project
 class ProjectRequester(models.Model):
     requester = models.ForeignKey(Requester)
     project = models.ForeignKey(Project)
-
+    created_timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
+    last_updated = models.DateTimeField(auto_now_add=False, auto_now=True)
+ 
 
 class Module(models.Model):
     name = models.CharField(max_length=128)
@@ -140,35 +165,41 @@ class Module(models.Model):
     #number of times a task needs to be performed
     repetition = models.IntegerField()
     module_timeout = models.IntegerField()
-    created_on = models.DateTimeField(default=timezone.now())
     deleted = models.BooleanField(default=False)
-
+    created_timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
+    last_updated = models.DateTimeField(auto_now_add=False, auto_now=True)
+ 
 
 
 class ModuleCategory(models.Model):
     module = models.ForeignKey(Module)
     category = models.ForeignKey(Category)
-
+    created_timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
+    last_updated = models.DateTimeField(auto_now_add=False, auto_now=True)
+ 
 
 class ProjectCategory(models.Model):
     project = models.ForeignKey(Project)
     category = models.ForeignKey(Category)
-
+    last_updated = models.DateTimeField(auto_now_add=False, auto_now=True)
+ 
 
 class Template(models.Model):
     name = models.CharField(max_length=128)
     owner = models.ForeignKey(Requester)
     source_html = models.TextField()
-    created_on = models.DateTimeField(default=timezone.now())
     deleted = models.BooleanField()
-
+    created_timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
+    last_updated = models.DateTimeField(auto_now_add=False, auto_now=True)
+ 
 
 class TemplateItem(models.Model):
     name = models.CharField(max_length=128)
     template = models.ForeignKey(Template)
-    created_on = models.DateTimeField(default=timezone.now())
     deleted = models.BooleanField()
-
+    created_timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
+    last_updated = models.DateTimeField(auto_now_add=False, auto_now=True)
+ 
 
 class TemplateItemProperties(models.Model):
     template_item = models.ForeignKey(TemplateItem)
@@ -176,7 +207,8 @@ class TemplateItemProperties(models.Model):
     operator = models.CharField(max_length=128)
     value1 = models.CharField(max_length=128)
     value2 = models.CharField(max_length=128)
-
+    last_updated = models.DateTimeField(auto_now_add=False, auto_now=True)
+ 
 
 class Task(models.Model):
     module = models.ForeignKey(Module)
@@ -187,15 +219,17 @@ class Task(models.Model):
                 (4, 'Finished')
     )
     status = models.IntegerField(choices=statuses, default=1)
-    created_on = models.DateTimeField(default=timezone.now())
     deleted = models.BooleanField(default=False)
-
+    created_timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
+    last_updated = models.DateTimeField(auto_now_add=False, auto_now=True)
+ 
 
 class TaskWorker(models.Model):
     task = models.ForeignKey(Task)
     worker = models.ForeignKey(Worker)
-    created_on = models.DateTimeField(default=timezone.now())
-
+    created_timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
+    last_updated = models.DateTimeField(auto_now_add=False, auto_now=True)
+ 
 
 class TaskWorkerResult(models.Model):
     task_worker = models.ForeignKey(TaskWorker)
@@ -207,7 +241,9 @@ class TaskWorkerResult(models.Model):
                 (4, 'Finished')
     )
     status = models.IntegerField(choices=statuses, default=1)
-
+    created_timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
+    last_updated = models.DateTimeField(auto_now_add=False, auto_now=True)
+ 
 
 class WorkerModuleApplication(models.Model):
     worker = models.ForeignKey(Worker)
@@ -218,8 +254,9 @@ class WorkerModuleApplication(models.Model):
                 (3, 'Rejected')
     )
     status = models.IntegerField(choices=statuses, default=1)
-
-
+    created_timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
+    last_updated = models.DateTimeField(auto_now_add=False, auto_now=True)
+ 
 
 class ActivityLog(models.Model):
 
@@ -228,8 +265,9 @@ class ActivityLog(models.Model):
     """
     activity = models.CharField(max_length=512)
     author = models.ForeignKey(User)
-    created_on = models.DateTimeField(default=timezone.now())
-
+    created_timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
+    last_updated = models.DateTimeField(auto_now_add=False, auto_now=True)
+ 
 
 class Qualification(models.Model):
     module = models.ForeignKey(Module)
@@ -237,6 +275,9 @@ class Qualification(models.Model):
     types = ((1, "Strict"),
             (2, 'Flexible'))
     type = models.IntegerField(choices=types, default=1)
+    created_timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
+    last_updated = models.DateTimeField(auto_now_add=False, auto_now=True)
+ 
 
 class QualificationItem(models.Model):
     qualification = models.ForeignKey(Qualification)
@@ -244,3 +285,6 @@ class QualificationItem(models.Model):
     operator = models.CharField(max_length=128)
     value1 = models.CharField(max_length=128)
     value2 = models.CharField(max_length=128)
+    created_timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
+    last_updated = models.DateTimeField(auto_now_add=False, auto_now=True)
+ 
