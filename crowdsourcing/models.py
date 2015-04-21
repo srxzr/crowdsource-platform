@@ -287,4 +287,24 @@ class QualificationItem(models.Model):
     value2 = models.CharField(max_length=128)
     created_timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
     last_updated = models.DateTimeField(auto_now_add=False, auto_now=True)
- 
+    
+
+class UserLanguage(models.Model):
+    language = models.ForeignKey(Language)
+    user = models.ForeignKey(UserProfile)
+    last_updated = models.DateTimeField(auto_now_add=False, auto_now=True)
+
+
+class Currency(models.Model):
+    name = models.CharField(max_length=32)
+    iso_code = models.CharField(max_length=8)
+    last_updated = models.DateTimeField(auto_now_add=False, auto_now=True)
+
+
+class UserPreference(models.Model):
+    user = models.OneToOneField(User)
+    language = models.ForeignKey(Language)
+    currency = models.ForeignKey(Currency)
+    login_alerts = models.SmallIntegerField(default=0)    
+    last_updated = models.DateTimeField(auto_now_add=False, auto_now=True)
+
