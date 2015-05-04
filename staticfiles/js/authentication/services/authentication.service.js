@@ -48,7 +48,7 @@
     */
     function register(email, firstname, lastname, password1, password2) {
       return $http({
-        url: '/api/v1/auth/register/',
+        url: '/api/user/',
         method: 'POST',
         data: {
           email: email,
@@ -69,7 +69,7 @@
      * @memberOf crowdsource.authentication.services.Authentication
      */
     function login(email, password) {
-      return $http.post('/api/v1/auth/login/', {
+      return $http.post('/api/user/authenticate/', {
         username: email, password: password
       });
     }

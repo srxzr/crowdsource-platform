@@ -1,7 +1,6 @@
 # from provider.oauth2.models import RefreshToken, AccessToken
 from crowdsourcing import models
 from crowdsourcing.forms import *
-from crowdsourcing.serializers import *
 from crowdsourcing.utils import *
 from csp import settings
 from datetime import datetime
@@ -21,11 +20,16 @@ from rest_framework.parsers import JSONParser
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 
+import hashlib, random
+
 import hashlib, random  #, httplib2
+
 import re
 from rest_framework.renderers import JSONRenderer
 from rest_framework.parsers import JSONParser
-from crowdsourcing.serializers import *
+from crowdsourcing.serializers.user import *
+from crowdsourcing.serializers.requester import *
+from crowdsourcing.serializers.project import *
 from crowdsourcing.utils import *
 from crowdsourcing.models import *
 from rest_framework.decorators import detail_route, list_route
@@ -41,7 +45,7 @@ class JSONResponse(HttpResponse):
         kwargs['content_type'] = 'application/json'
         super(JSONResponse, self).__init__(content, **kwargs)
 
-
+#has been moved to utils, will be removed from here
 def get_model_or_none(model, *args, **kwargs):
     """
         Get model object or return None, this will catch the DoesNotExist error.
@@ -56,7 +60,7 @@ def get_model_or_none(model, *args, **kwargs):
     except model.DoesNotExist:
         return None
 
-
+#Obsolete, will be removed in the next PUSH
 class Registration(APIView):
     """
         This class handles the registration process.
@@ -166,7 +170,7 @@ class Registration(APIView):
         except:
             print "failed to send mail"
 
-
+#Obsolete, will be removed in the next PUSH
 class Login(APIView):
     """
         This class handles the login process, it checks the user credentials and if redirected from another page
@@ -240,6 +244,8 @@ class Login(APIView):
                 response_data["last_name"] = self.user.last_name
                 response_data["date_joined"] = self.user.date_joined
                 response_data["last_login"] = self.user.last_login
+
+                login(request, self.user)
                 return Response(response_data, status=status.HTTP_201_CREATED)
                 #login(request, self.user)
                 #serializer = UserSerializer(self.user)
@@ -384,7 +390,7 @@ class Oauth2TokenView(rest_framework_views.APIView):
 #Will be moved to Class Views
 #################################################
 def home(request):
-    return render(request, 'catalog/main.html')
+    return render(request,'index.html')
 
 
 def registration_successful(request):
@@ -473,28 +479,31 @@ class MyProject(generics.ListCreateAPIView):
     def post(self, request, *args, **kwargs):
         data = json.loads(request.body.decode('utf-8'))
         name = data.get('project_name', '')
-        deadline = data.get('project_date', '')
-        _format = data.get('time_format','')
+        deadline_date = data.get('project_datetime', '')
+
+        keywords = data.get('project_keywords', '')
+
+
         from crowdsourcing.models import Project
         project = Project()
         project.name = name
-        from datetime import datetime
-        project.deadline = datetime.now()
-        project.save()
-        return HttpResponseRedirect('/')
+        project.keywords=keywords
 
-    serializer_class = MyProjectSerializer
+        from datetime import datetime
+        project.deadline=deadline_date
+
+        project.save()
+        return Response({"status": "CREATED" , "projectid":str(project.id)}, status=status.HTTP_201_CREATED)
+
+    serializer_class = ProjectSerializer
 
     def get_queryset(self):
         projectid = self.request.QUERY_PARAMS.get('projectid', None)
         if projectid is not None:
             queryset= Project.objects.filter(id=projectid)
-
             return queryset
 
         else:
             return Project.objects.all()
-
-
 
 
