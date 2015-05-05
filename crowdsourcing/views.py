@@ -495,13 +495,14 @@ class MyProject(generics.ListCreateAPIView):
         project.deadline=deadline_date
 
         project.save()
+        name = username.get('username')
+        from crowdsourcing.models import User
+        usr = User.objects.filter(username=name)
         from crowdsourcing.models import Requester
-        Requester.objects.filter
-        requester = Requester()
+        requester = Requester.objects.filter(user=usr)
         from crowdsourcing.models import ProjectRequester
         projectrequester = ProjectRequester()
         projectrequester.project = project
-        requester.username = username.get('username')
         projectrequester.requester = requester
         projectrequester.save()
         return Response({"status": "CREATED" , "projectid":str(project.id)}, status=status.HTTP_201_CREATED)
