@@ -482,6 +482,8 @@ class MyProject(generics.ListCreateAPIView):
         deadline_date = data.get('project_datetime', '')
 
         keywords = data.get('project_keywords', '')
+        username = data.get('user_name','')
+
 
 
         from crowdsourcing.models import Project
@@ -493,6 +495,15 @@ class MyProject(generics.ListCreateAPIView):
         project.deadline=deadline_date
 
         project.save()
+        from crowdsourcing.models import Requester
+        Requester.objects.filter
+        requester = Requester()
+        from crowdsourcing.models import ProjectRequester
+        projectrequester = ProjectRequester()
+        projectrequester.project = project
+        requester.username = username.get('username')
+        projectrequester.requester = requester
+        projectrequester.save()
         return Response({"status": "CREATED" , "projectid":str(project.id)}, status=status.HTTP_201_CREATED)
 
     serializer_class = ProjectSerializer

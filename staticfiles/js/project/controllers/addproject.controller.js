@@ -10,12 +10,12 @@
     .module('crowdsource.project.controllers',['ui.bootstrap'])
     .controller('AddProjectController', AddProject);
 
-  AddProject.$inject = ['$scope','$http','$location'];
+  AddProject.$inject = ['$scope','$rootScope','$http','$location','Authentication'];
 
   /**
   * @namespace AddProjectController
   */
-  function AddProject($scope,$http,$location) {
+  function AddProject($scope,$rootScope,$http,$location,Authentication) {
 $scope.today = function() {
     $scope.dt = new Date();
 
@@ -62,6 +62,8 @@ $scope.today = function() {
 
       function postit()
       {
+      if(Authentication.isAuthenticated())
+         $rootScope.account = Authentication.getAuthenticatedAccount();
           $http({
         url: "/api-auth/v1/project/own/",
         method: "POST",
@@ -70,7 +72,8 @@ $scope.today = function() {
           project_name: vm.project_name,
 
             project_datetime: $scope.dt,
-            project_keywords:vm.project_keywords
+            project_keywords:vm.project_keywords,
+            user_name: $rootScope.account,
 
         }
       }).success(function(data,config){
